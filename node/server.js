@@ -77,14 +77,19 @@ server.on('request', function (request, response) {
 		  let [ question ] = request.question;
 		  let type = qtype_to_name[question.type];
 		  let { name } = question;
-		  let address = DOMAIN[type][name];
-		  if(address) {
-			  console.log('type', type, 'name', name);
-			  response.answer.push(address);
-			  response.send();
+		  if(DOMAIN[type]) {
+			  let address = DOMAIN[type][name];
+			  if(address) {
+				  console.log('type', type, 'name', name);
+				  response.answer.push(address);
+				  response.send();
+			  } else {
+				  response.send();
+//				  console.log('type', type, 'name', name);
+			  }
 		  } else {
+			  console.log('type', type, 'name', name);
 			  response.send();
-//			  console.log('type', type, 'name', name);
 		  }
 	} catch (e) {
 		console.log('e', e);
