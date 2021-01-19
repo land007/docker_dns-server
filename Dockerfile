@@ -12,6 +12,8 @@ EXPOSE 53/udp
 #docker build -t land007/dns-server:latest .
 #> docker buildx build --platform linux/amd64,linux/arm64/v8,linux/arm/v7 -t land007/dns-server --push .
 #docker run --rm -it --name dns-server -p 53:53/udp -v ~/docker/dns-server/:/node/ land007/dns-server:latest
+#docker rm -f dns-server; docker run --restart always -it --name dns-server -p 53:53/udp -v ~/docker/dns-server/:/node/ land007/dns-server:latest
 #docker exec -it dns-server bash
 #dig www.qhkly.com @127.0.0.1
+#systemctl stop firewalld
 #sudo killall dnsmasq
