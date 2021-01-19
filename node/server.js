@@ -4,6 +4,10 @@ const dns = require('native-dns'),
 const fs = require('fs');
 const readline = require('readline');
 
+const DNS_SERVER = process.env['DNS_SERVER'] || '8.8.8.8';
+const DNS_PORT = process.env['DNS_PORT'] || '53';
+const DNS_TYPE = process.env['DNS_TYPE'] || 'udp';
+
 var  qtype_to_name = {};
 for(var name in consts.NAME_TO_QTYPE) {
 	qtype_to_name[consts.NAME_TO_QTYPE[name] ] = name;
@@ -41,7 +45,7 @@ var DOMAIN = {A:{},NS:{},MX:{}};
 //		}
 //};
 
-async function processLineByLine() {
+const processLineByLine = async function () {
   const fileStream = fs.createReadStream('zone.txt');
   const rl = readline.createInterface({
     input: fileStream,
@@ -72,7 +76,7 @@ async function processLineByLine() {
 
 processLineByLine();
  
-server.on('request', function (request, response) {
+server.on('request', async function (request, response) {
 	try {
 		  let [ question ] = request.question;
 		  let type = qtype_to_name[question.type];
@@ -84,11 +88,13 @@ server.on('request', function (request, response) {
 				  response.answer.push(address);
 				  response.send();
 			  } else {
+				  let  answer = await find_name(name, type);
+				  response.answer = answer;
 				  response.send();
-//				  console.log('type', type, 'name', name);
 			  }
 		  } else {
-			  console.log('type', type, 'name', name);
+			  let  answer = await find_name(name, type);
+			  response.answer = answer;
 			  response.send();
 		  }
 	} catch (e) {
@@ -101,3 +107,39 @@ server.on('error', function (err, buff, req, res) {
 });
  
 server.serve(53);
+
+var find_name = function(name, type) {
+	return new Promise(function(resolve, reject) {
+		var question = dns.Question({
+			  name,//: 'www.google.com',
+			  type//: 'A',
+			});
+
+			var start = Date.now();
+
+			var req = dns.Request({
+			  question: question,
+//			  server: { address: '8.8.8.8', port: 53, type: 'udp' },
+			  server: { address: DNS_SERVER, port: DNS_PORT, type: DNS_TYPE },
+			  timeout: 1000,
+			});
+
+			req.on('timeout', function () {
+			  console.log('Timeout in making request');
+			});
+
+			req.on('message', function (err, answer) {
+//			  answer.answer.forEach(function (a) {
+//			    console.log(a.address);
+//			  });
+			  resolve(answer.answer);
+			});
+
+			req.on('end', function () {
+			  var delta = (Date.now()) - start;
+			  console.log('type', type, 'name', name, 'request',  delta.toString() + 'ms');
+			});
+
+			req.send();
+	});
+}

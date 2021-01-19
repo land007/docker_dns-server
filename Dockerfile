@@ -7,6 +7,11 @@ ADD node/server.js /node_/server.js
 ADD node/zone.txt /node_/zone.txt
 ADD start.sh /start.sh
 RUN chmod +x /start.sh
+
+ENV DNS_SERVER=8.8.8.8\
+	DNS_PORT=53\
+	DNS_TYPE=udp
+
 EXPOSE 53/udp
 
 #docker build -t land007/dns-server:latest .
