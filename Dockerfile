@@ -14,3 +14,4 @@ EXPOSE 53/udp
 #docker run --rm -it --name dns-server -p 53:53/udp -v ~/docker/dns-server/:/node/ land007/dns-server:latest
 #docker exec -it dns-server bash
 #dig www.qhkly.com @127.0.0.1
+#sudo killall dnsmasq
