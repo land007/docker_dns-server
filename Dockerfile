@@ -23,4 +23,6 @@ EXPOSE 53/udp
 #dig www.qhkly.com @192.168.1.124 -p 30053
 ##dig www.qhkly.com @192.168.1.124 -p 30053 +tcp
 #systemctl stop firewalld
+
+#yum remove dnsmasq
 #sudo killall dnsmasq
