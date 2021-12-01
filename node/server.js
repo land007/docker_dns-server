@@ -56,7 +56,10 @@ const processLineByLine = async function () {
     let lines = line.split(' ');
     if(lines[2] == 'IN' && lines[3] == 'A') {
     	let name = lines[0].substring(0, lines[0].length -1);
-    	DOMAIN.A[name] = dns.A({
+		if(DOMAIN.A[name] === undefined) {
+			DOMAIN.A[name] = [];
+		}
+    	DOMAIN.A[name][DOMAIN.A[name].length] = dns.A({
 			  name: name,
 			  address: lines[4],
 			  ttl: lines[1]
@@ -85,7 +88,10 @@ server.on('request', async function (request, response) {
 			  let address = DOMAIN[type][name];
 			  if(address) {
 				  console.log('type', type, 'name', name);
-				  response.answer.push(address);
+				  let _address = address.sort(function(){return Math.random()-0.5;});
+				  for(let i in _address) {
+				    response.answer.push(_address[i]);
+				  }
 				  response.send();
 			  } else {
 				  let  answer = await find_name(name, type);
